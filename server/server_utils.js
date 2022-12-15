@@ -1,17 +1,6 @@
 const fs = require('fs')
 const homePagePath = "../client/index.html";
-
-/*
-in some cases you will find a server utils file, or folder
-and I want you to have some exposure to what that may look like
-
-some of the advantages of having a utilities file are:
-1.you can group relevant / related bits of logic together
-2.it will help you follow the single responsibility principle
-3.it will help keep your code DRY
-*/
-
-let commentsArray = []
+const commentsArray = []
 
 const serverUtils = {
   parseReqBody: (encodedString) => {
@@ -24,7 +13,6 @@ const serverUtils = {
         return acc;
       }, {});
   },
-
   injectHtmlData: (html, tags, data) => {
     for (const tag of tags) {
       const regex = new RegExp(tag, "g")
@@ -32,15 +20,12 @@ const serverUtils = {
     }
     return injectedHtml
   },
-
   getFileText: (path) => {
     return fs.readFileSync(path, 'utf-8');
   },
-
   parseFilePath: (req) => {
     return '.' + req.url.split("/static")[1]
   },
-
   setContentType: (fileType) => {
     switch (fileType) {
       case "jpg":
@@ -59,7 +44,6 @@ const serverUtils = {
 }
 
 let serverRouter = {
-  /* --- HANDLE STATIC ASSET --- */
   'serveAsset': (req, res, assetPath) => {
     const fileType = assetPath.split('/')[1]
     const resBody = serverUtils.getFileText(assetPath)
@@ -68,9 +52,6 @@ let serverRouter = {
     res.setHeader('Content-Type', serverUtils.setContentType(fileType));
     return res.end(resBody);
   },
-
-
-  /* --- GET ROUTES --- */
   'GET': {
     'home': (req, res) => {
       const htmlPage = serverUtils.getFileText(homePagePath);
@@ -82,9 +63,6 @@ let serverRouter = {
       return res.end(resBody);
     },
   },
-
-
-  /* --- POST ROUTES --- */
   'POST': {
     'comments': (req, res) => {
       commentsArray.push(req.body.comment);
@@ -96,8 +74,4 @@ let serverRouter = {
   }
 }
 
-module.exports = {
-  commentsArray,
-  serverUtils,
-  serverRouter,
-}
+module.exports = { commentsArray, serverUtils, serverRouter }

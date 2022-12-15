@@ -1,21 +1,15 @@
 const http = require("http");
-const {
-  serverRouter,
-  serverUtils: { parseReqBody, parseFilePath }
-} = require("./server_utils");
-
+const { serverRouter, serverUtils: { parseReqBody, parseFilePath } }
+  = require("./server_utils");
+const port = 5000;
 
 const server = http.createServer((req, res) => {
   let reqBody = "";
-  req.on("data", (data) => {
-    reqBody += data;
-  });
+  req.on("data", (data) => reqBody += data);
 
   req.on("end", () => {
     // Parsing the body of the request
-    if (reqBody) {
-      req.body = parseReqBody(reqBody)
-    }
+    if (reqBody) req.body = parseReqBody(reqBody)
 
     if (req.method === "GET" && req.url.startsWith("/static")) {
       const assetPath = parseFilePath(req)
@@ -31,7 +25,5 @@ const server = http.createServer((req, res) => {
     }
   });
 });
-
-const port = 5000;
 
 server.listen(port, () => console.log(`Success: listening on port ${port}...`));

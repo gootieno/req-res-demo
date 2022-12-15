@@ -1,6 +1,5 @@
 const http = require("http");
 const fs = require("fs");
-const serverUtils = require("./server_utils");
 
 const commentsArray = [];
 const path = "../client/index.html";
