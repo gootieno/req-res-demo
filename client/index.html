@@ -5,23 +5,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/index.css" rel="stylesheet">
-    <title>Comment Away</title>
+    <title>Comments App</title>
 </head>
 <body>
-    <h2 id="comments-title">Comments</h2>
-    <section id="comment-box">
-        <div id="comments-container">
+    <h2 id="comments-heading">Comments</h2>
+    <section id="comments-container">
+        <div id="comments">
             <ul>
                 #{comments}
             </ul>
         </div>
     </section>
-    <section id="comments-input-container">
+    <div id="comments-form-container">
         <form action="/comments" method="post">
-            <label for="comment" name="comment">
             <input name="comment" type="text" />
-            <button type="submit" id="submit-button">Submit</button>    
+            <button>Submit Comment</button>
         </form>
-    </section>
+    </div>
 </body>
 </html>
