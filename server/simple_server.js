@@ -11,27 +11,63 @@ const server = http.createServer((req, res) => {
     reqBody += data;
   });
 
-  if (req.method === "GET" && req.url.startsWith("/static")) {
-    const urlParts = req.url.split("/static");
+  req.on("end", () => {
+    // Parsing the body of the request
+    if (reqBody) {
+      req.body = reqBody
+        .split("&") // [affiliate=nasa,query=Mars+Rover%21]
+        .map((keyValuePair) => keyValuePair.split("=")) // [[affiliate,nasa],[query,Mars+Rover%21]]
+        .map(([key, value]) => [key, value.replace(/\+/g, " ")]) // [[affiliate,nasa],[query,Mars Rover%21]]
+        .map(([key, value]) => [key, decodeURIComponent(value)]) // [[affiliate,nasa],[query,Mars Rover!]]
+        .reduce((acc, [key, value]) => {
+          // [[affiliate,nasa],[query,Mars Rover!]]
+          acc[key] = value;
+          return acc;
+        }, {});
+      console.log(req.body);
+      /*
+      {affiliate: nasa, query: Mars Rover!}
+        */
+    }
 
-    const staticPath = urlParts[1];
+    if (req.method === "GET" && req.url.startsWith("/static")) {
+      const urlParts = req.url.split("/static");
 
-    const resBody = fs.readFileSync("./" + staticPath);
+      console.log("url parts ", urlParts);
+      const staticPath = urlParts[1]; // /css/index.css
 
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/css");
-    return res.end(resBody);
-  }
+      console.log("static path ", staticPath);
+      const resBody = fs.readFileSync("." + staticPath); // ./css/index.css
 
-  if (req.method === "GET" && req.url === "/") {
-    const htmlPage = fs.readFileSync(path, "utf-8");
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/css");
+      return res.end(resBody);
+    }
 
-    let resBody = htmlPage.replace("#{comments}", commentsArray);
+    if (req.method === "GET" && req.url === "/") {
+      const htmlPage = fs.readFileSync(path, "utf-8");
 
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/html");
-    return res.end(resBody);
-  }
+      const commentsList = commentsArray.map(
+        (comment) => `<li>${comment}</li>`
+      );
+
+      const resBody = htmlPage.replace(/#{comments}/g, commentsList.join(""));
+
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/html");
+      return res.end(resBody);
+    }
+
+    if (req.method === "POST" && req.url === "/comments") {
+      const { comment } = req.body;
+
+      commentsArray.push(comment);
+
+      res.statusCode = 302;
+      res.setHeader("Location", "/");
+      return res.end();
+    }
+  });
 });
 
 const port = 5000;
